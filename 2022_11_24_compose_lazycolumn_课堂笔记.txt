@@ -1,0 +1,110 @@
+复习：
+无页面架构 -》MVx = MVC/MVP/MVVM -》Compose  优缺点和应用场景
+工作中和面试中：具体问题具体分析
+选择题要当简答题来回答
+
+MVVM + Compose + Jetpack
+
+1、为什么要迁移到compose？
+2、特点？
+3、怎么用？
+
+90% List ->Item都是一样的
+Gson-》Moshi：1、性能  codegen的方式 3倍
+                              2、模式支持多态数据
+
+[
+     { 
+           type: 1,
+           name: Meimei,
+           age: 18,
+     },
+     { 
+           type: 2,
+           name: changsha,
+           age: 2000,
+     }
+]
+
+gson解析不了下面的数据结构，但是模式可以，网络协议的优化
+[
+     { 
+           type: 1,
+           name: Meimei,
+           age: 18,
+           height: 170cm
+     },
+     { 
+           type: 2,
+           name: changsha,
+           age: 2000,
+           hotspot: jvzizhoutou,
+     }
+]
+
+TabLayout + ViewPager + Fragment
+View/ViewGroup：命令式UI：返回一个对象；-》set属性；继承（类 构造函数）recyclerView.addScrollListener
+Recyclerview：4个if else， viewholder的创建代码放在adapter违背了单一职责原则；-》开闭原则
+     ||
+     \/
+Compose lazycolumn：1个if else；声明式UI：组合（函数）；天生就是数据驱动的；更新了怎么办？开发者不关心更新-》平台来关心-》怎么关心？跨平台的
+Compose技术（组合，函数）-》Composable（自定义的视图）-》recomposer-》recompose-》composition
+数据集
+   ||
+   \/
+ applier
+    ||
+    \/
+compose ui material3
+
+修改字节码-》composable增加参数-》recomposer
+compose：1.3.2正式版  1.4.0-alpha08  coil compose的glide不好用，会闪一下
+
+适配器：将数据适配到View
+remember: 成员函数
+
+TextView
+Button
+
+flag
+
+声明式UI，compose
+声明式编程思想：html/css/sql  select * from table；
+命令式编程思想：java/c/c++
+
+命令式-》声明式  不是android的特长，ios swiftui/flutter/h5 时代的趋势
+
+命令式：结果 + 过程
+if (flag == 1) {
+	TextView("test").setVisibility(View.VISIBLE);
+          Button("button").setVisibility(View.GONE);
+} else {
+	TextView("test").setVisibility(View.GONE);
+          Button("button").setVisibility(View.VISIBLE);
+}
+
+声明式：只关注结果
+if (flag == 1) {
+	Text("test");
+} else {
+          Button("button");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

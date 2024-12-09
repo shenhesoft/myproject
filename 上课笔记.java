@@ -7,71 +7,99 @@
 
 
 
-Hook点 并不是唯一的  --- 
 
-动态代理 --- 反射实现
+加载插件的资源
 
-
-ActivityManager.getService()  --- 静态方法，可以获取返回值 --- IActivityManager
+宿主的资源到底怎么加载
 
 
+AssetManager --> Resource --> Context
 
-IActivityManager 对象 --- Singleton类的get方法获取的 -- private T mInstance;
-
-proxyInstance  替换系统的 mInstance 对象
-
-
-mInstance 非静态 -- Singleton 的对象 -- IActivityManagerSingleton 是静态的，可以通过反射获取
-
-判断进程  包名  
-
-找到 Intent的方便替换的地方  --- 在这个类里面 ActivityClientRecord --- Intent intent 非静态
-
-	-- 获取 ActivityClientRecord 对象
-	final ActivityClientRecord r = (ActivityClientRecord) msg.obj;
-
-Handler源码
-
-if (mCallback != null) {
-    if (mCallback.handleMessage(msg)) {
-        return;
-    }
-}
-handleMessage(msg);
+Application
+Activity
+Service
 
 
-系统的 mCallback == null
-
-创建 mCallback 替换系统的 -- 从而拿到 msg  -- msg.obj; -- intent
-
-ClientTransaction == msg.obj   ---- private List<ClientTransactionItem> mActivityCallbacks;private List<ClientTransactionItem> mActivityCallbacks; --  -- ClientTransactionItem的子类
-
-private Intent mIntent; -- LaunchActivityItem 对象  -- private List<ClientTransactionItem> mActivityCallbacks; 
-		-- ClientTransaction == msg.obj 
-
-Hook点不是唯一的
-
-动态代理  替换的对象  系统的 IActivityManager
+final ResourcesKey key = new ResourcesKey(
+        resDir, --- 资源文件
 
 
-找到 静态的变量或者直接拿到类的对象
+assets.addAssetPath(key.mResDir)  --- 把宿主的资源 添加到集合中
+
+宿主的代码  --- dexElements
 
 
+assets.addAssetPath(插件的资源)  --- 把宿主的资源 添加到集合中
+使用资源  -- 直接使用到插件的资源了
 
 
+实现方式：
+1. 插件的资源 和 宿主的资源 直接合并 -- 资源冲突  0x7f0a000a -- aapt  7f -- 70~7e ~ff
+2. 专门创建一个 （Resource）AssetManger 加载插件的资源
 
+7f:apk 包的 id
+0a：资源类型的 id --- 01++
+000a： 统一类型下的 id  0000++
+
+
+资源冲突 
+
+
+类加载器去加载的时候  --- 
+
+
+Application  --- Boot
+
+
+怎么让插件  获取  宿主创建的 Resource
+
+1.会不会影响到宿主 --- 肯定会 -- 在插件中创建 Resource
+2.宿主和插件的 Application 是同一个 --- 插件自定义的 Application 会执行吗？ 不会执行
+
+
+能不能在插件中去创建？
 
 
 
 
 
+.ap_ 文件
+
+四字节对齐
+zipalign --- 
+1. 运行快 --- mmap
+2. RAM 内存
 
 
+// 这块代码执行的是宿主的
+// mDecorContentParent == null
+mDecorContentParent = (DecorContentParent) subDecor
+    .findViewById(R.id.decor_content_parent);
+mDecorContentParent.setWindowCallback(getWindowCallback());
+
+// 宿主
+mDecorContentParent = (DecorContentParent) subDecor
+    .findViewById(0x7f07004e);
+
+// 宿主的
+0x7f07004e	decor_content_parent	false
+
+// 插件的
+0x7f07004d	decor_content_parent	false
+
+aapt  --- 单独给插件创建一个 Resource  --- 都会产生
+
+都是宿主的 context  --- 插件自己创建一个 context -- 绑定 启动插件资源的  Resource 
 
 
+包名类名全部相同  --- 加载的就是宿主的 
 
 
+宿主的 dexElements（既有宿主的代码也有插件的代码）
 
+创建一个 包含插件的代码的 dexElements
+获取 宿主的 dexElements
 
+怎么去找 Hook点 --- activity启动流程 --- Intent  --- 容易替换 Intent的地方 
 
-
+Activity 代码 -- 宿主的 -- 影响宿主
